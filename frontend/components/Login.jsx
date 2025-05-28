@@ -154,6 +154,52 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
                 </div>
               </form>
 
+              {/* OAuth button */}
+              <div className="d-grid gap-2 mt-3">
+                <a
+                  className="btn btn-outline-danger d-flex align-items-center justify-content-center"
+                  style={{ gap: "8px" }}
+                  onClick={() => {
+                    const width = 500;
+                    const height = 600;
+                    const left = (window.innerWidth - width) / 2;
+                    const top = (window.innerHeight - height) / 2;
+
+                    const authWindow = window.open(
+                      "http://localhost:5000/auth/google",
+                      "GoogleLogin",
+                      `width=${width},height=${height},top=${top},left=${left}`
+                    );
+                  }}
+                >
+                  {/* Google SVG Icon */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 533.5 544.3"
+                  >
+                    <path
+                      fill="#4285f4"
+                      d="M533.5 278.4c0-18.4-1.6-36-4.8-52.9H272v100.3h146.9c-6.3 34.1-25.6 62.9-54.8 82v68.3h88.5c51.8-47.8 81.9-118 81.9-197.7z"
+                    />
+                    <path
+                      fill="#34a853"
+                      d="M272 544.3c73.6 0 135.6-24.3 180.8-65.9l-88.5-68.3c-24.5 16.4-55.8 26-92.3 26-70.9 0-131-47.9-152.4-112.4h-90v70.6c45.7 90.1 139.2 149 242.4 149z"
+                    />
+                    <path
+                      fill="#fbbc04"
+                      d="M119.6 322.7c-10.5-31.4-10.5-65.5 0-96.9v-70.6h-90c-37.1 73.3-37.1 160.7 0 234l90-66.5z"
+                    />
+                    <path
+                      fill="#ea4335"
+                      d="M272 107.7c39.8 0 75.7 13.7 103.9 40.4l77.9-77.9C407.2 24.3 345.2 0 272 0 168.8 0 75.3 58.9 29.6 149l90 70.6c21.4-64.5 81.5-112.4 152.4-112.4z"
+                    />
+                  </svg>
+                  <span>Continue with Google</span>
+                </a>
+              </div>
+
               <div className="text-center mt-3">
                 <a href="/" className="text-decoration-none">
                   Forgot Password?
