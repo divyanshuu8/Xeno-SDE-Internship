@@ -8,6 +8,27 @@ function isAuthenticated(req, res, next) {
   res.status(401).json({ message: "Unauthorized" });
 }
 
+router.get("/get-dashboard-data", isAuthenticated, (req, res) => {
+  try {
+    // Assuming Passport.js sets the user info on req.user after Google OAuth
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    // Extract the user's name
+    const userName = req.user.displayName || req.user.name || "Unknown";
+
+    // Optionally, print to server console
+    console.log("Logged in user name:", userName);
+
+    // Send the name back in response
+    res.json({ name: userName });
+  } catch (error) {
+    console.error("Error retrieving user data:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 // -------------------- Add Customer --------------------
 router.post("/add-customer", isAuthenticated, async (req, res) => {
   try {

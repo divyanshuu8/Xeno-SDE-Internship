@@ -1,6 +1,9 @@
 require("dotenv").config();
 require("./config/passport");
 const dataRoutes = require("./routes/dataRoutes"); // Path as per your folder structure
+const cookieParser = require('cookie-parser');
+
+
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -33,6 +36,7 @@ mongoose
 // Session
 app.use(express.json());
 app.use(sessionMiddleware(mongoUrl, sessionSecret));
+app.use(cookieParser());
 
 // Passport
 app.use(passport.initialize());

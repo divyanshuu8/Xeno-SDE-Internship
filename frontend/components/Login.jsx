@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Tabs from "../utils/Tab";
 import toast from "react-hot-toast";
 
 const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
-  const navigate = useNavigate();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -21,48 +19,7 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
       return;
     }
 
-    if (activeTab === "register") {
-      if (password !== confirmPassword) {
-        toast.error("Passwords do not match");
-        return;
-      }
-
-      try {
-        const response = await fetch("http://localhost:5000/auth/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: fullName, email, password }),
-          credentials: "include",
-        });
-        const result = await response.json();
-        if (response.ok) {
-          toast.success(result.message);
-          setActiveTab("login");
-          navigate("/login");
-        } else toast.error(result.message);
-      } catch (error) {
-        console.error("Sign up error:", error);
-        toast.error("An error occurred during sign up.");
-      }
-    } else {
-      try {
-        const response = await fetch("http://localhost:5000/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-          credentials: "include",
-        });
-        const result = await response.json();
-        if (response.ok) {
-          toast.success(result.message);
-          setIsLoggedIn(true);
-          navigate("/");
-        } else toast.error(result.message);
-      } catch (error) {
-        console.error("Login error:", error);
-        toast.error("An error occurred during login.");
-      }
-    }
+    toast.error("Please Sign in with Google.");
   };
 
   return (

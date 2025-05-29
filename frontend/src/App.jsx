@@ -1,35 +1,31 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import NavbarComponent from "../components/Navbar";
 import Home from "../pages/Home";
 import Login from "../components/Login";
+import toast, { Toaster } from "react-hot-toast";
+import API from "./api";
+import Dashboard from "../pages/Dashboard";
 
 function App() {
-  // Define the states here
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState("login"); // or any default tab
+  const [activeTab, setActiveTab] = useState("login");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch auth status on first load
-    fetch("http://localhost:5000/api/auth/status", {
-      credentials: "include", // include cookies
-    })
-      .then((res) => res.json())
-      .then((data) => setIsLoggedIn(data.isLoggedIn))
+    API.get("/api/auth/status")
+      .then((res) => setIsLoggedIn(res.data.isLoggedIn))
       .catch((err) => console.log("Auth check error:", err));
 
-    // Listen for messages from popup
     const handleMessage = (event) => {
-      if (event.origin !== "http://localhost:5000") return; // adjust for production
+      if (event.origin !== "http://localhost:5000") return;
 
       if (event.data.success) {
-        console.log("OAuth login successful:", event.data.message);
-        setIsLoggedIn(true); // immediately update login state
-
-        // Optional: Fetch user data again if needed
-        // fetch("http://localhost:5000/api/me", { credentials: "include" }).then(...)
+        toast.success("OAuth login successful");
+        setIsLoggedIn(true);
+        navigate("/dashboard");
       } else {
-        console.warn("OAuth login failed:", event.data.message);
+        toast.error("OAuth login failed");
       }
     };
 
@@ -38,8 +34,23 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <NavbarComponent isLoggedIn={isLoggedIn} />
+    <>
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            background: "#ffffff",
+            color: "#007BFF",
+            fontWeight: "bold",
+            border: "1px solid #0056b3",
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
+            padding: "12px 16px",
+            borderRadius: "8px",
+          },
+        }}
+      />
+      <NavbarComponent isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route
@@ -52,9 +63,9 @@ function App() {
             />
           }
         />
-        {/* Add more routes as needed */}
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
-    </Router>
+    </>
   );
 }
 

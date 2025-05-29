@@ -67,7 +67,8 @@ router.get("/logout", (req, res, next) => {
     req.session.destroy((err) => {
       if (err) console.log(err);
       res.clearCookie("connect.sid");
-      res.redirect(process.env.FRONTEND_URL + "/");
+      // Send a response here to complete the request:
+      res.status(200).json({ message: "Logged out successfully" });
     });
   });
 });
