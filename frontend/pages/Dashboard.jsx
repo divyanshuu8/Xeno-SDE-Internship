@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
+import CustomerCard from "../utils/CustomerCard";
+import OrderCard from "../utils/OrderCard";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [showOrderModal, setShowOrderModal] = useState(false);
 
   useEffect(() => {
     // Simulate 5-second data fetching delay
@@ -35,9 +39,35 @@ const Dashboard = () => {
 
         <h2 className="mb-3">Welcome, Divyanshu Singh</h2>
         <div>
-          <button className="btn btn-primary me-2">Add Customer</button>
-          <button className="btn btn-success">Add Order</button>
+          <button
+            className="btn btn-primary me-2"
+            onClick={() => setShowCustomerModal(true)}
+          >
+            Add Customer
+          </button>
+          <button
+            className="btn btn-success"
+            onClick={() => setShowOrderModal(true)}
+          >
+            Add Order
+          </button>
         </div>
+        <OrderCard
+          show={showOrderModal}
+          onClose={() => setShowOrderModal(false)}
+          onOrderAdded={(data) => {
+            console.log("Order added:", data);
+            // Refresh order list here if needed
+          }}
+        />
+        <CustomerCard
+          show={showCustomerModal}
+          onClose={() => setShowCustomerModal(false)}
+          onCustomerAdded={(data) => {
+            console.log("Customer added:", data);
+            // Optionally refresh list here
+          }}
+        />
 
         <main className="main-content relative rounded-lg">
           <div className="container-fluid py-4">

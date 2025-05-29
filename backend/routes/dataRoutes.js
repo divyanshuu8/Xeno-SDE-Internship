@@ -8,6 +8,29 @@ function isAuthenticated(req, res, next) {
   res.status(401).json({ message: "Unauthorized" });
 }
 
+// GET /api/latest-customer-id
+router.get("/latest-customer-id", isAuthenticated, async (req, res) => {
+  try {
+    const latest = await Customer.findOne().sort({ customer_id: -1 });
+    const nextId = latest ? String(Number(latest.customer_id) + 1) : "10001";
+    res.json({ nextCustomerId: nextId });
+  } catch (err) {
+    console.error("Error fetching latest customer ID:", err);
+    res.status(500).json({ message: "Failed to get latest customer ID" });
+  }
+});
+
+router.get("/latest-order-id", isAuthenticated, async (req, res) => {
+  try {
+    const latest = await Order.findOne().sort({ order_id: -1 });
+    const nextId = latest ? String(Number(latest.order_id) + 1) : "10001";
+    res.json({ nextOrderId: nextId });
+  } catch (err) {
+    console.error("Error fetching latest order ID:", err);
+    res.status(500).json({ message: "Failed to get latest order ID" });
+  }
+});
+
 router.get("/get-dashboard-data", isAuthenticated, (req, res) => {
   try {
     // Assuming Passport.js sets the user info on req.user after Google OAuth
