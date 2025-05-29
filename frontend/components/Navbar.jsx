@@ -24,7 +24,6 @@ const NavbarComponent = ({ isLoggedIn, setIsLoggedIn }) => {
   const handleSignOut = async () => {
     try {
       await API.get("/logout"); // Logout API call
-      console.error("Logout failed:");
       toast.success("Logged out successfully");
       // Optional: clear user state if stored
       setIsLoggedIn(false);
@@ -70,12 +69,21 @@ const NavbarComponent = ({ isLoggedIn, setIsLoggedIn }) => {
               )}
             </li>
             <li className="nav-item">
-              <button
-                className="btn btn-primary rounded-pill px-4"
-                onClick={handleDashboardClick}
-              >
-                Get started
-              </button>
+              {isLoggedIn ? (
+                <button
+                  className="btn btn-primary rounded-pill px-4"
+                  onClick={handleDashboardClick}
+                >
+                  Dashboard
+                </button>
+              ) : (
+                <button
+                  className="btn btn-primary rounded-pill px-4"
+                  onClick={handleDashboardClick}
+                >
+                  Get Started
+                </button>
+              )}
             </li>
           </ul>
         </div>

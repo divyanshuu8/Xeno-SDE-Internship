@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import API from "../src/api"; // adjust the path as needed
+import toast from "react-hot-toast";
 
 const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
   const [formData, setFormData] = useState({
@@ -21,7 +22,7 @@ const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
           }));
         } catch (err) {
           console.error("Failed to fetch customer ID", err);
-          alert("Failed to generate Customer ID");
+          toast.error("Failed to generate Customer ID");
         }
       }
     };
@@ -37,7 +38,8 @@ const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
 
     try {
       const res = await API.post("/api/add-customer", formData);
-      if (res.status === 200) {
+      if (res.status === 200 || res.status === 201) {
+        toast.success("Customer Sucessfully Added")
         onCustomerAdded(res.data.customer); // optional callback
         onClose(); // close modal
       }
@@ -46,7 +48,7 @@ const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
         "Error adding customer:",
         err.response?.data || err.message
       );
-      alert("Failed to add customer");
+      toast.error("Failed to add customer");
     }
   };
 

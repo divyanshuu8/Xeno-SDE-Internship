@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../src/api"; // use your centralized axios instance
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const OrderCard = ({ show, onClose, onOrderAdded }) => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,10 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
     items: "",
     status: "pending",
   });
+
+  const [customerName, setCustomerName] = useState(""); // To store fetched customer name
+  const [customerLoading, setCustomerLoading] = useState(false);
+  const [customerError, setCustomerError] = useState(null);
 
   // Fetch latest order id when modal shows
   useEffect(() => {
@@ -23,12 +28,42 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
           }));
         } catch (err) {
           console.error("Failed to fetch order ID", err);
-          alert("Failed to generate Order ID");
+          toast.error("Failed to generate Order ID");
         }
       }
     };
     fetchNextOrderId();
   }, [show]);
+
+  // Fetch customer name whenever customer_id changes and is not empty
+  useEffect(() => {
+    const fetchCustomerName = async () => {
+      if (!formData.customer_id.trim()) {
+        setCustomerName("");
+        setCustomerError(null);
+        return;
+      }
+
+      setCustomerLoading(true);
+      setCustomerError(null);
+
+      try {
+        const res = await API.get(
+          `api/customers/${formData.customer_id.trim()}`
+        );
+        console.log(res);
+        // Assuming API returns { id: "...", name: "Customer Name" }
+        setCustomerName(res.data.name);
+      } catch (err) {
+        setCustomerName("");
+        setCustomerError("Customer not found");
+      } finally {
+        setCustomerLoading(false);
+      }
+    };
+
+    fetchCustomerName();
+  }, [formData.customer_id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,6 +75,13 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("handleSubmit called");
+
+    // Prevent submission if customer name not found or error exists
+    if (customerError || !customerName) {
+      toast.error("Please enter a valid Customer ID.");
+      return;
+    }
 
     const payload = {
       ...formData,
@@ -49,21 +91,21 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
 
     try {
       const res = await API.post("/api/add-order", payload);
-      if (res.status === 200) {
-        onOrderAdded(res.data.order);
-        onClose();
+      if (res.status === 200 || res.status === 201) {
+        console.log("Calling onOrderAdded");
+        toast.success("Order Successfully Added");
+        onOrderAdded(res.data.order); // <--- THIS MUST BE CALLED
+        onClose(); // close modal
       }
     } catch (err) {
       console.error("Error adding order:", err.response?.data || err.message);
-      alert("Failed to add order");
+      toast.error("Failed to add order");
     }
   };
 
   return (
     <div
       className={`modal fade ${show ? "show d-block" : ""}`}
-      tabIndex="-1"
-      role="dialog"
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
     >
       <div className="modal-dialog" role="document">
@@ -101,6 +143,18 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
                   onChange={handleChange}
                   required
                 />
+                {/* Preview area */}
+                <div style={{ marginTop: "5px", minHeight: "24px" }}>
+                  {customerLoading && <small>Loading customer...</small>}
+                  {!customerLoading && customerName && (
+                    <small className="text-success">
+                      Customer Name: {customerName}
+                    </small>
+                  )}
+                  {!customerLoading && customerError && (
+                    <small className="text-danger">{customerError}</small>
+                  )}
+                </div>
               </div>
 
               <div className="mb-3">

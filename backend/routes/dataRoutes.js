@@ -1,12 +1,107 @@
 const express = require("express");
 const router = express.Router();
 const { Customer, Order } = require("../model/schemas"); // Update path if different
+const Campaign = require("../model/Campaign"); // Your campaign model file
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.status(401).json({ message: "Unauthorized" });
 }
+
+// POST /api/create-campaign
+router.post("/create-campaign", isAuthenticated, async (req, res) => {
+  const { name, audienceSegment, audienceSize } = req.body;
+
+  if (!name || !audienceSegment || audienceSize === undefined) {
+    return res.status(400).json({
+      message: "Name, audience segment, and audience size are required",
+    });
+  }
+
+  let parsedQuery;
+  try {
+    parsedQuery =
+      typeof audienceSegment === "string"
+        ? JSON.parse(audienceSegment)
+        : audienceSegment;
+  } catch (err) {
+    return res.status(400).json({ message: "Invalid audience segment JSON" });
+  }
+
+  try {
+    const matchedCustomers = await Customer.find(parsedQuery).select("_id");
+
+    const campaign = new Campaign({
+      name,
+      audienceSegment: parsedQuery,
+      audienceSize,
+      customers: matchedCustomers.map((c) => c._id),
+    });
+
+    await campaign.save();
+
+    res.status(201).json(campaign);
+  } catch (err) {
+    console.error("Error creating campaign:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/campaign/:id", isAuthenticated, async (req, res) => {
+  try {
+    const campaign = await Campaign.findById(req.params.id);
+    if (!campaign) return res.status(404).json({ message: "Not found" });
+
+    res.json(campaign);
+  } catch (err) {
+    console.error("Error fetching campaign:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.post("/audience-size", isAuthenticated, async (req, res) => {
+  const { query } = req.body;
+
+  if (!query) {
+    return res.status(400).json({ error: "Query is required" });
+  }
+
+  let parsedQuery;
+  try {
+    parsedQuery = typeof query === "string" ? JSON.parse(query) : query;
+  } catch (err) {
+    return res.status(400).json({ error: "Invalid JSON query" });
+  }
+
+  try {
+    const count = await Customer.countDocuments(parsedQuery);
+    return res.status(200).json({ size: count });
+  } catch (error) {
+    console.error("Error counting customers:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /api/customers/:customer_id
+router.get("/customers/:customer_id", isAuthenticated, async (req, res) => {
+  const customerId = req.params.customer_id;
+
+  try {
+    // Find customer by customer_id field (not _id)
+    const customer = await Customer.findOne({ customer_id: customerId });
+
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    // Return only id and name
+    res.json({ id: customer.customer_id, name: customer.name });
+  } catch (err) {
+    console.error("Error fetching customer:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // GET /api/latest-customer-id
 router.get("/latest-customer-id", isAuthenticated, async (req, res) => {
@@ -31,23 +126,47 @@ router.get("/latest-order-id", isAuthenticated, async (req, res) => {
   }
 });
 
-router.get("/get-dashboard-data", isAuthenticated, (req, res) => {
+router.get("/get-dashboard-data", isAuthenticated, async (req, res) => {
   try {
-    // Assuming Passport.js sets the user info on req.user after Google OAuth
     if (!req.user) {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
-    // Extract the user's name
     const userName = req.user.displayName || req.user.name || "Unknown";
 
-    // Optionally, print to server console
-    console.log("Logged in user name:", userName);
+    // Aggregate totals
+    const totalAmountResult = await Order.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAmountSpent: { $sum: "$amount" },
+          totalOrders: { $sum: 1 },
+        },
+      },
+    ]);
 
-    // Send the name back in response
-    res.json({ name: userName });
+    const totalAmountSpent =
+      totalAmountResult.length > 0 ? totalAmountResult[0].totalAmountSpent : 0;
+    const totalOrders =
+      totalAmountResult.length > 0 ? totalAmountResult[0].totalOrders : 0;
+
+    // Fetch all customers and orders
+    // Optionally you can limit fields by passing second argument to find()
+    const customers = await Customer.find({});
+    const orders = await Order.find({});
+    const campaigns = await Campaign.find({});
+
+    res.json({
+      name: userName,
+      totalAmountSpent,
+      totalCustomers: customers.length,
+      totalOrders,
+      customers, // array of all customer docs
+      orders, // array of all order docs
+      campaigns, // ✅ added campaigns data
+    });
   } catch (error) {
-    console.error("Error retrieving user data:", error);
+    console.error("Error retrieving dashboard data:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

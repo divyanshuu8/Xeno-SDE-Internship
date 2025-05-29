@@ -3,7 +3,6 @@ import Tabs from "../utils/Tab";
 import toast from "react-hot-toast";
 
 const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
-
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,7 +14,7 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Please fill in all fields");
+      toast.error("Please Sign in with Google.");
       return;
     }
 
@@ -49,6 +48,7 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
+                      disabled
                     />
                   </div>
                 )}
@@ -66,6 +66,7 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    disabled
                   />
                 </div>
 
@@ -82,6 +83,7 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    disabled
                   />
                 </div>
 
@@ -99,6 +101,7 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
+                      disabled
                     />
                   </div>
                 )}

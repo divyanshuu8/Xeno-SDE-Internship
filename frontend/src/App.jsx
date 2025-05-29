@@ -6,6 +6,7 @@ import Login from "../components/Login";
 import toast, { Toaster } from "react-hot-toast";
 import API from "./api";
 import Dashboard from "../pages/Dashboard";
+import CampaignLog from "../pages/CampaignLog";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -64,6 +65,7 @@ function App() {
           }
         />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/:logId" element={<CampaignLog />} />
       </Routes>
     </>
   );

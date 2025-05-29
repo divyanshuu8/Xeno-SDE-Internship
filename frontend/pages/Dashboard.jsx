@@ -1,43 +1,108 @@
 import React, { useEffect, useState } from "react";
 import CustomerCard from "../utils/CustomerCard";
 import OrderCard from "../utils/OrderCard";
+import API from "../src/api"; // adjust path as needed
+import CampaignCard from "../utils/CampaignCard";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const [data, setData] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(5);
+  const [visibleCountOC, setVisibleCountOC] = useState(5);
+  const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [campaigns, setCampaigns] = useState([]);
 
+  // Reusable fetch function
+  const fetchData = () => {
+    setLoading(true);
+    API.get("/api/get-dashboard-data") // your actual API route here
+      .then((res) => {
+        setData(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching data:", err);
+        setLoading(false);
+      });
+  };
+
+  // Fetch on mount
   useEffect(() => {
-    // Simulate 5-second data fetching delay
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 5000);
-
-    return () => clearTimeout(timer);
+    fetchData();
   }, []);
+
+  if (loading)
+    return (
+      <div
+        className="position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex justify-content-center align-items-center"
+        style={{ zIndex: 1050 }}
+      >
+        <div
+          className="spinner-border text-primary"
+          role="status"
+          style={{ width: "3rem", height: "3rem" }}
+        >
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  // Handler for Load More button
+  const loadMoreOC = () => {
+    setVisibleCountOC((prev) => prev + 5);
+  };
+
+  const orderToShow = data.orders.slice(0, visibleCountOC);
+  const loadMore = () => {
+    setVisibleCount((prev) => prev + 5);
+  };
+
+  const customersToShow = data.customers.slice(0, visibleCount);
+
+  const operatorMap = {
+    $gt: ">",
+    $lt: "<",
+    $gte: ">=",
+    $lte: "<=",
+    $eq: "=",
+    $ne: "≠",
+  };
+
+  const getReadableLogic = (segment) => {
+    if (!segment || typeof segment !== "object") return "N/A";
+
+    return Object.entries(segment)
+      .map(([field, condition]) => {
+        if (typeof condition === "object") {
+          return Object.entries(condition)
+            .map(
+              ([op, value]) =>
+                `${field} ${operatorMap[op] || op} ${JSON.stringify(value)}`
+            )
+            .join(" AND ");
+        } else {
+          return `${field} = ${JSON.stringify(condition)}`;
+        }
+      })
+      .join(" AND ");
+  };
+
+  const handleViewLogs = (campaign) => {
+    navigate(`/dashboard/${campaign._id}`);
+  };
+  
   return (
     <>
-      {loading && (
-        <div
-          className="position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex justify-content-center align-items-center"
-          style={{ zIndex: 1050 }}
-        >
-          <div
-            className="spinner-border text-primary"
-            role="status"
-            style={{ width: "3rem", height: "3rem" }}
-          >
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      )}
       <div
         className="container my-5"
         style={{ display: loading ? "none" : "block" }}
       >
         <div className="min-h-[300px] bg-dark absolute w-full"></div>
 
-        <h2 className="mb-3">Welcome, Divyanshu Singh</h2>
+        <h2 className="mb-3">Welcome, {data.name}</h2>
         <div>
           <button
             className="btn btn-primary me-2"
@@ -57,7 +122,8 @@ const Dashboard = () => {
           onClose={() => setShowOrderModal(false)}
           onOrderAdded={(data) => {
             console.log("Order added:", data);
-            // Refresh order list here if needed
+            setShowOrderModal(false); // <-- close modal explicitly here
+            fetchData();
           }}
         />
         <CustomerCard
@@ -65,7 +131,7 @@ const Dashboard = () => {
           onClose={() => setShowCustomerModal(false)}
           onCustomerAdded={(data) => {
             console.log("Customer added:", data);
-            // Optionally refresh list here
+            fetchData();
           }}
         />
 
@@ -82,7 +148,9 @@ const Dashboard = () => {
                           <p className="text-sm mb-0 text-uppercase font-weight-bold">
                             Total Money Spent
                           </p>
-                          <h5 className="font-weight-bolder">$53,000</h5>
+                          <h5 className="font-weight-bolder">
+                            ₹ {data.totalAmountSpent}
+                          </h5>
                           <p className="mb-0">
                             <span className="text-success text-sm font-weight-bolder">
                               +55%
@@ -114,7 +182,9 @@ const Dashboard = () => {
                           <p className="text-sm mb-0 text-uppercase font-weight-bold">
                             Total Users
                           </p>
-                          <h5 className="font-weight-bolder">2,300</h5>
+                          <h5 className="font-weight-bolder">
+                            {data.totalCustomers}
+                          </h5>
                           <p className="mb-0">
                             <span className="text-success text-sm font-weight-bolder">
                               +3%
@@ -146,7 +216,9 @@ const Dashboard = () => {
                           <p className="text-sm mb-0 text-uppercase font-weight-bold">
                             Total Orders
                           </p>
-                          <h5 className="font-weight-bolder">462</h5>
+                          <h5 className="font-weight-bolder">
+                            {data.totalOrders}
+                          </h5>
                           <p className="mb-0">
                             <span className="text-danger text-sm font-weight-bolder">
                               -2%
@@ -192,47 +264,47 @@ const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>CUST123456</td>
-                      <td>Ravi Sharma</td>
-                      <td>ravi@example.com</td>
-                      <td>9876543210</td>
-                      <td>$1,200</td>
-                      <td>5</td>
-                      <td>2025-05-25</td>
-                      <td>2024-11-10</td>
-                      <td>
-                        <span className="badge bg-success">Yes</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>CUST654321</td>
-                      <td>Anjali Mehta</td>
-                      <td>anjali@example.com</td>
-                      <td>9123456780</td>
-                      <td>$650</td>
-                      <td>2</td>
-                      <td>2025-04-18</td>
-                      <td>2024-12-05</td>
-                      <td>
-                        <span className="badge bg-danger">No</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>CUST987654</td>
-                      <td>Mohit Verma</td>
-                      <td>mohit@example.com</td>
-                      <td>9988776655</td>
-                      <td>$2,450</td>
-                      <td>10</td>
-                      <td>2025-05-20</td>
-                      <td>2024-10-01</td>
-                      <td>
-                        <span className="badge bg-success">Yes</span>
-                      </td>
-                    </tr>
+                    {customersToShow.map((customer) => (
+                      <tr key={customer._id}>
+                        <td>{customer.customer_id}</td>
+                        <td>{customer.name}</td>
+                        <td>{customer.email}</td>
+                        <td>{customer.phone}</td>
+                        <td>₹{customer.total_spent}</td>
+                        <td>{customer.total_orders}</td>
+                        <td>
+                          {customer.last_order_date
+                            ? new Date(
+                                customer.last_order_date
+                              ).toLocaleDateString()
+                            : "-"}
+                        </td>
+                        <td>
+                          {new Date(customer.signup_date).toLocaleDateString()}
+                        </td>
+                        <td>
+                          {customer.is_active ? (
+                            <span className="badge bg-success">Yes</span>
+                          ) : (
+                            <span className="badge bg-danger">No</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
+                {/* Show Load More only if there are more customers to show */}
+                {visibleCount < data.customers.length && (
+                  <div className="text-center my-3">
+                    <button
+                      className="btn btn-primary"
+                      onClick={loadMore}
+                      disabled={loading}
+                    >
+                      {loading ? "Loading..." : "Load More"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -256,40 +328,45 @@ const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>ORD001</td>
-                      <td>CUST001</td>
-                      <td>₹1,500</td>
-                      <td>Shirt, Jeans</td>
-                      <td>{new Date("2025-05-10").toLocaleDateString()}</td>
-                      <td>
-                        <span className="badge bg-success">Completed</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>ORD002</td>
-                      <td>CUST002</td>
-                      <td>₹2,300</td>
-                      <td>T-shirt, Shoes</td>
-                      <td>{new Date("2025-05-22").toLocaleDateString()}</td>
-                      <td>
-                        <span className="badge bg-warning text-dark">
-                          Pending
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>ORD003</td>
-                      <td>CUST003</td>
-                      <td>₹999</td>
-                      <td>Cap, Socks</td>
-                      <td>{new Date("2025-05-25").toLocaleDateString()}</td>
-                      <td>
-                        <span className="badge bg-danger">Cancelled</span>
-                      </td>
-                    </tr>
+                    {orderToShow.map((order) => (
+                      <tr key={order._id}>
+                        <td>{order.order_id}</td>
+                        <td>{order.customer_id}</td>
+                        <td>₹{order.amount}</td>
+                        <td>{order.items.join(", ")}</td>
+                        <td>
+                          {new Date(order.order_date).toLocaleDateString()}
+                        </td>
+                        <td>
+                          <span
+                            className={
+                              order.status.toLowerCase() === "completed"
+                                ? "badge bg-success"
+                                : order.status.toLowerCase() === "pending"
+                                ? "badge bg-warning"
+                                : "badge bg-secondary"
+                            }
+                          >
+                            {order.status.charAt(0).toUpperCase() +
+                              order.status.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
+                {/* Show Load More only if there are more customers to show */}
+                {visibleCountOC < data.orders.length && (
+                  <div className="text-center my-3">
+                    <button
+                      className="btn btn-info"
+                      onClick={loadMoreOC}
+                      disabled={loading}
+                    >
+                      {loading ? "Loading..." : "Load More"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -299,9 +376,20 @@ const Dashboard = () => {
           <div className="card">
             <div className="card-header d-flex justify-content-between align-items-center bg-secondary text-white">
               <h5 className="mb-0">Campaigns</h5>
-              <button className="btn btn-light text-dark fw-bold">
+              <button
+                className="btn btn-light text-dark fw-bold"
+                onClick={() => setShowCampaignModal(true)}
+              >
                 + Add Campaign
               </button>
+              {/* CampaignCard modal */}
+              <CampaignCard
+                show={showCampaignModal}
+                onClose={() => setShowCampaignModal(false)}
+                onCampaignCreated={(newCampaign) => {
+                  setCampaigns((prev) => [newCampaign, ...prev]);
+                }}
+              />
             </div>
             <div className="card-body">
               <div className="table-responsive">
@@ -311,24 +399,25 @@ const Dashboard = () => {
                       <th>Campaign Name</th>
                       <th>Audience Size</th>
                       <th>Campaign Logic</th>
+                      <th>View</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>High Spenders</td>
-                      <td>1,250</td>
-                      <td>Spend INR 10,000 AND visits 3</td>
-                    </tr>
-                    <tr>
-                      <td>Inactive Users</td>
-                      <td>980</td>
-                      <td>Inactive for 90 days</td>
-                    </tr>
-                    <tr>
-                      <td>Big Cart Abandoners</td>
-                      <td>620</td>
-                      <td>Spend INR 5,000 AND no order placed</td>
-                    </tr>
+                    {data.campaigns.map((campaign) => (
+                      <tr key={campaign._id}>
+                        <td>{campaign.name}</td>
+                        <td>{campaign.audienceSize}</td>
+                        <td>{getReadableLogic(campaign.audienceSegment)}</td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-primary me-2"
+                            onClick={() => handleViewLogs(campaign)}
+                          >
+                            View Logs
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
