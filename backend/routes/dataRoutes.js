@@ -2,12 +2,98 @@ const express = require("express");
 const router = express.Router();
 const { Customer, Order } = require("../model/schemas"); // Update path if different
 const Campaign = require("../model/Campaign"); // Your campaign model file
+const {
+  generateQueryFromNLP,
+  generateTitleFromNLP,
+  generateMessageFromNLP,
+} = require("../genAi/OpenAi");
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.status(401).json({ message: "Unauthorized" });
 }
+
+router.post("/generate-message", async (req, res) => {
+  const { campaignId, segment } = req.body;
+  console.log(campaignId, segment);
+
+  if (!campaignId || !segment) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  try {
+    const generatedMessage = await generateMessageFromNLP(campaignId, segment);
+    res.json({ success: true, generatedMessage });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to generate message." });
+  }
+});
+
+router.post("/nlp-to-query", async (req, res) => {
+  const { description } = req.body;
+  console.log("Received description:", description);
+
+  if (!description) {
+    return res.status(400).json({ error: "Missing description" });
+  }
+
+  try {
+    const query = await generateQueryFromNLP(description);
+    const title = await generateTitleFromNLP(description);
+
+    return res.json({ query, title });
+  } catch (err) {
+    console.error("NLP to query failed:", err);
+    return res.status(500).json({ error: "Failed to generate query" });
+  }
+});
+
+// POST /api/communication-log
+router.post("/communication-log", async (req, res) => {
+  try {
+    const { campaignId, message, modes } = req.body;
+
+    if (!campaignId || !message || !modes || !Array.isArray(modes)) {
+      return res.status(400).json({ error: "Invalid input data" });
+    }
+
+    const campaign = await Campaign.findById(campaignId);
+    if (!campaign) {
+      return res.status(404).json({ error: "Campaign not found" });
+    }
+
+    const total = campaign.audienceSize || 0;
+
+    // Calculate exact 90% and 10% split with whole numbers
+    let failed = Math.floor(total * 0.1); // always 10% rounded down
+    let sent = total - failed;
+
+    const newLog = {
+      message,
+      modes,
+      stats: {
+        total,
+        sent,
+        failed,
+      },
+      createdAt: new Date(),
+    };
+
+    // Save the log
+    campaign.communicationLog.push(newLog);
+    await campaign.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Communication log saved successfully",
+      log: newLog,
+    });
+  } catch (err) {
+    console.error("Error saving communication log:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // POST /api/create-campaign
 router.post("/create-campaign", isAuthenticated, async (req, res) => {
@@ -50,7 +136,11 @@ router.post("/create-campaign", isAuthenticated, async (req, res) => {
 
 router.get("/campaign/:id", isAuthenticated, async (req, res) => {
   try {
-    const campaign = await Campaign.findById(req.params.id);
+    const campaign = await Campaign.findById(req.params.id).populate(
+      "customers",
+      "name email phone"
+    ); // only select desired fields
+
     if (!campaign) return res.status(404).json({ message: "Not found" });
 
     res.json(campaign);

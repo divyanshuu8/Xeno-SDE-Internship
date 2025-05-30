@@ -93,7 +93,7 @@ const Dashboard = () => {
   const handleViewLogs = (campaign) => {
     navigate(`/dashboard/${campaign._id}`);
   };
-  
+
   return (
     <>
       <div
@@ -111,10 +111,22 @@ const Dashboard = () => {
             Add Customer
           </button>
           <button
-            className="btn btn-success"
+            className="btn btn-success me-2"
             onClick={() => setShowOrderModal(true)}
           >
             Add Order
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              const campaignElement =
+                document.getElementById("campaign-section");
+              if (campaignElement) {
+                campaignElement.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
+            ↓ Campaign
           </button>
         </div>
         <OrderCard
@@ -372,7 +384,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="container-fluid mt-5">
+        <div id="campaign-section" className="container-fluid mt-5">
           <div className="card">
             <div className="card-header d-flex justify-content-between align-items-center bg-secondary text-white">
               <h5 className="mb-0">Campaigns</h5>
@@ -388,6 +400,7 @@ const Dashboard = () => {
                 onClose={() => setShowCampaignModal(false)}
                 onCampaignCreated={(newCampaign) => {
                   setCampaigns((prev) => [newCampaign, ...prev]);
+                  fetchData();
                 }}
               />
             </div>

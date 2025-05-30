@@ -23,15 +23,14 @@ const campaignSchema = new mongoose.Schema(
     ],
     communicationLog: [
       {
-        customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
-        message: { type: String },
-        status: {
-          type: String,
-          enum: ["SENT", "FAILED", "PENDING"],
-          default: "PENDING",
+        message: String,
+        modes: [String],
+        stats: {
+          sent: Number,
+          failed: Number,
+          total: Number,
         },
-        deliveryReceiptTimestamp: { type: Date },
-        lastUpdated: { type: Date, default: Date.now },
+        createdAt: Date,
       },
     ],
     stats: {
