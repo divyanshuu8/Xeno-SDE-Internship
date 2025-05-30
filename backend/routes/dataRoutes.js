@@ -218,6 +218,7 @@ router.get("/latest-order-id", isAuthenticated, async (req, res) => {
 
 router.get("/get-dashboard-data", isAuthenticated, async (req, res) => {
   try {
+    console.log("👉 req.user:", req.user);
     if (!req.user) {
       return res.status(401).json({ message: "User not authenticated" });
     }
