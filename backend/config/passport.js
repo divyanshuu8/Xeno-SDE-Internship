@@ -10,11 +10,13 @@ passport.use(
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, done) => {
+      console.log("✅ Google profile received:", profile);
       try {
         // Check if user exists
         let existingUser = await User.findOne({ googleId: profile.id });
 
         if (existingUser) {
+          console.log("🙌 User exists:", existingUser.email);
           return done(null, existingUser);
         }
 
@@ -28,6 +30,7 @@ passport.use(
           photo: profile.photos[0].value,
           provider: profile.provider,
         });
+        console.log("🎉 New user created:", newUser.email);
 
         return done(null, newUser);
       } catch (err) {
