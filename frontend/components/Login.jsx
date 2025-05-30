@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Tabs from "../utils/Tab";
 import toast from "react-hot-toast";
+import API from '../src/api'; // adjust the path accordingly
 
 const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
   const [fullName, setFullName] = useState("");
@@ -23,7 +24,7 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
 
   return (
     <div className="container">
-      <div className="row justify-content-center mt-5">
+      <div className="row justify-content-center mt-5 mb-5">
         <div className="col-md-6 col-lg-4">
           <div className="card shadow-lg">
             <div className="card-body p-5">
@@ -125,8 +126,14 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
                     const left = (window.innerWidth - width) / 2;
                     const top = (window.innerHeight - height) / 2;
 
-                    const authWindow = window.open(
-                      "http://localhost:5000/auth/google",
+                    // Construct the full URL by appending the auth route to baseURL
+                    const authUrl = new URL(
+                      "/auth/google",
+                      API.defaults.baseURL
+                    ).href;
+
+                    window.open(
+                      authUrl,
                       "GoogleLogin",
                       `width=${width},height=${height},top=${top},left=${left}`
                     );

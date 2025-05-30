@@ -7,6 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import API from "./api";
 import Dashboard from "../pages/Dashboard";
 import CampaignLog from "../pages/CampaignLog";
+import SaaSFooter from "../components/Footer";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,7 +20,9 @@ function App() {
       .catch((err) => console.log("Auth check error:", err));
 
     const handleMessage = (event) => {
-      if (event.origin !== "http://localhost:5000") return;
+      const allowedOrigin = new URL(API.defaults.baseURL).origin;
+
+      if (event.origin !== allowedOrigin) return;
 
       if (event.data.success) {
         toast.success("OAuth login successful");
@@ -67,6 +70,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:logId" element={<CampaignLog />} />
       </Routes>
+      <SaaSFooter />
     </>
   );
 }

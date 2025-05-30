@@ -36,7 +36,7 @@ const NavbarComponent = ({ isLoggedIn, setIsLoggedIn }) => {
   return (
     <nav className="navbar navbar-expand-lg bg-white shadow-sm py-3">
       <div className="container">
-        <a className="navbar-brand text-primary fs-2" href="/">
+        <a className="navbar-brand text-primary fw-bold fs-2" href="/">
           Mi-CMS
         </a>
 

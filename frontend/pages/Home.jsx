@@ -1,11 +1,12 @@
 import React from "react";
-import NavbarComponent from "../components/Navbar";
 import HeroSection from "../components/HeroSection";
+import CustomerEngagementPlatform from "../components/CEF";
 
 const Home = () => {
   return (
     <>
       <HeroSection />
+      <CustomerEngagementPlatform />
     </>
   );
 };
