@@ -41,7 +41,6 @@ app.use(cookieParser());
 app.use(sessionMiddleware(mongoUrl, sessionSecret));
 app.use(passport.initialize());
 app.use(passport.session());
-s;
 
 // Routes
 app.get("/", (req, res) => {
