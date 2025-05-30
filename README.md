@@ -90,3 +90,49 @@ npm run dev
 ```
 
 The frontend will be available at: http://localhost:5173
+
+### 4. Architecture Diagram
+
+![Architecture-Diagram](./assets/ArchitectureDesign.png)
+
+The architecture of **Mi-CMS** is designed to ensure modularity, scalability, and AI-driven insights. Below is the high-level diagram of the system:
+
+### 🔍 Key Components:
+
+- **Authentication**  
+  Google OAuth is used for secure login.
+
+- **Dashboard**  
+  Central control panel that interacts with all major services.
+
+- **Customer Module**  
+  Handles adding and managing customer information.
+
+- **Order Module**  
+  Lets users add customer orders.
+
+- **Backend (Node.js)**  
+  Acts as the main API server, orchestrating communication between the frontend, database, and AI services.
+
+- **MongoDB**  
+  Used to store all structured data like customers, orders, and logs.
+
+- **Communication Logs**  
+  Records customer interactions—either manually entered or AI-generated—for deeper insights.
+
+- **OpenAI Integration**  
+  Powers smart suggestions, insights, and personalized communication based on logs and customer profiles.
+
+### 5. Summary of AI Tools and Other Technologies Used
+
+- **Frontend:** Built with **React** for a dynamic and responsive user interface.
+
+- **Backend:** Developed using **Express** framework on **Node.js**, serving as the main API server.
+
+- **Database:** **MongoDB** is used to store all structured data including customers, orders, and logs.
+
+- **AI:** Integrated with the **OpenAI API** to provide smart suggestions, insights, and personalized communication.
+
+- **CSS Framework:** **Bootstrap** is used for styling and to ensure a clean, responsive design.
+
+### 6. Known limitations or assumptions
