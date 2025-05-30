@@ -11,15 +11,13 @@ module.exports = (mongoUrl, sessionSecret) => {
     store: MongoStore.create({
       mongoUrl,
       collectionName: "sessions",
-      crypto: {
-        secret: sessionSecret,
-      },
+      // No crypto option here — sessions will be stored as plain JSON
       touchAfter: 24 * 60 * 60, // time period in seconds
     }),
     cookie: {
       httpOnly: true,
-      secure: true, // only HTTPS in production (required by browsers)
-      sameSite: "none", // required for cross-origin cookies (Netlify <-> Render)
+      secure: true, // HTTPS only in production
+      sameSite: "none", // needed for cross-origin cookies (Netlify frontend + Render backend)
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     },
   });

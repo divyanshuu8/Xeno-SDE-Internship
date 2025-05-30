@@ -34,12 +34,14 @@ mongoose
 
 // Session
 app.use(express.json());
-app.use(sessionMiddleware(mongoUrl, sessionSecret));
+
 app.use(cookieParser());
 
 // Passport
+app.use(sessionMiddleware(mongoUrl, sessionSecret));
 app.use(passport.initialize());
 app.use(passport.session());
+s;
 
 // Routes
 app.get("/", (req, res) => {
