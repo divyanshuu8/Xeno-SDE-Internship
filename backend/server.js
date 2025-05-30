@@ -1,9 +1,7 @@
 require("dotenv").config();
 require("./config/passport");
 const dataRoutes = require("./routes/dataRoutes"); // Path as per your folder structure
-const cookieParser = require('cookie-parser');
-
-
+const cookieParser = require("cookie-parser");
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -43,6 +41,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Routes
+app.get("/", (req, res) => {
+  res.send("Welcome to Mi-CMS");
+});
+
 app.use(authRoutes);
 app.use("/api", dataRoutes);
 
