@@ -32,7 +32,7 @@ app.use(
     origin:
       process.env.NODE_ENV === "production"
         ? process.env.FRONTEND_URL
-        : "http://localhost:5767",
+        : "http://localhost:5173",
     // Allow credentials (cookies, authorization headers, etc.) to be sent in requests.
     credentials: true,
   })
