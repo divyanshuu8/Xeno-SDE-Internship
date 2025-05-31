@@ -12,6 +12,7 @@ Only use the following schema fields:
 - signup_date: Date
 - is_active: Boolean
 
+IMPORTANT: For any date value, ALWAYS use an ISO 8601 string (e.g., "2025-01-01T00:00:00.000Z") and NEVER use new Date().
 Return ONLY the MongoDB query object — no explanations, no comments, and no text before or after the JSON.
   `;
 
@@ -33,8 +34,14 @@ Return ONLY the MongoDB query object — no explanations, no comments, and no te
     const queryText = response.choices[0].message.content.trim();
     console.log("Response from OpenAI:", queryText);
 
+    // Replace any new Date("...") or new Date('...') with the ISO string inside (robust, global)
+    const safeJson = queryText.replace(
+      /new Date\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+      '"$1"'
+    );
+
     // Extract valid JSON only
-    const match = queryText.match(/{[\s\S]*}/);
+    const match = safeJson.match(/{[\s\S]*}/);
     if (match) {
       return JSON.parse(match[0]);
     } else {
