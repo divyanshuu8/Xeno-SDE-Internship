@@ -30,7 +30,9 @@ function App() {
             if (res.data.isLoggedIn) {
               toast.success("OAuth login successful");
               setIsLoggedIn(true);
-              navigate("/dashboard");
+              // Instead of navigate, force a re-render by updating state
+              // Optionally, you can also reload the page:
+              // window.location.reload();
             } else {
               toast.error("Session not established. Please try again.");
             }
@@ -45,7 +47,7 @@ function App() {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [navigate]);
+  }, [navigate, setIsLoggedIn]);
 
   return (
     <>
