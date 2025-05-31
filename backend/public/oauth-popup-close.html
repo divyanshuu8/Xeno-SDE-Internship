@@ -8,6 +8,8 @@
     <script>
       const params = new URLSearchParams(window.location.search);
       const success = params.get("success") === "true";
+      console.log("OAuth popup loaded");
+      console.log("window.opener:", window.opener);
       if (window.opener) {
         window.opener.postMessage(
           { success, message: success ? "Login successful" : "Login failed" },
