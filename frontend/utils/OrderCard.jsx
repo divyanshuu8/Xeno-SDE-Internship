@@ -16,12 +16,14 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
   const [customerLoading, setCustomerLoading] = useState(false);
   const [customerError, setCustomerError] = useState(null);
   const [loading, setLoading] = useState(false); // New loading state
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   // Fetch latest order id when modal shows
   useEffect(() => {
     const fetchNextOrderId = async () => {
       if (show) {
         try {
+          k;
           const res = await API.get("/api/latest-order-id");
           setFormData((prev) => ({
             ...prev,
@@ -105,6 +107,14 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
     } finally {
       setLoading(false); // Reset loading state
     }
+  };
+
+  const handleCancel = () => {
+    setCancelLoading(true);
+    setTimeout(() => {
+      setCancelLoading(false);
+      onClose();
+    }, 400);
   };
 
   return (
@@ -206,10 +216,10 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={onClose}
-                disabled={loading}
+                onClick={handleCancel}
+                disabled={cancelLoading}
               >
-                {loading ? (
+                {cancelLoading ? (
                   <span>
                     <span
                       className="spinner-border spinner-border-sm me-2"

@@ -7,6 +7,7 @@ const CommunicationCard = ({ campaign, onClose, refreshCampaign }) => {
   const [message, setMessage] = useState("");
   const [modes, setModes] = useState(["email"]);
   const [loading, setLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
@@ -64,6 +65,14 @@ const CommunicationCard = ({ campaign, onClose, refreshCampaign }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    setCancelLoading(true);
+    setTimeout(() => {
+      setCancelLoading(false);
+      onClose();
+    }, 400);
   };
 
   return (
@@ -136,11 +145,11 @@ const CommunicationCard = ({ campaign, onClose, refreshCampaign }) => {
       <div className="d-flex justify-content-end mt-4">
         <Button
           variant="secondary"
-          onClick={onClose}
+          onClick={handleCancel}
           className="me-2"
-          disabled={loading}
+          disabled={cancelLoading}
         >
-          {loading ? (
+          {cancelLoading ? (
             <span>
               <span
                 className="spinner-border spinner-border-sm me-1"

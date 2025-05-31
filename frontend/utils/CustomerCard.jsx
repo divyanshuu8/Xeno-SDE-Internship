@@ -11,6 +11,7 @@ const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
     phone: "",
   });
   const [loading, setLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   useEffect(() => {
     const fetchNextCustomerId = async () => {
@@ -53,6 +54,14 @@ const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    setCancelLoading(true);
+    setTimeout(() => {
+      setCancelLoading(false);
+      onClose();
+    }, 400);
   };
 
   return (
@@ -127,10 +136,10 @@ const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={onClose}
-                disabled={loading}
+                onClick={handleCancel}
+                disabled={cancelLoading}
               >
-                {loading ? (
+                {cancelLoading ? (
                   <span>
                     <span
                       className="spinner-border spinner-border-sm me-2"
