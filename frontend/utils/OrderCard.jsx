@@ -60,7 +60,7 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
       } finally {
         setCustomerLoading(false);
       }
-    }, 600); // 600ms debounce
+    }, 1600); // 600ms debounce
     return () => clearTimeout(debounceTimeout.current);
   }, [formData.customer_id]);
 
