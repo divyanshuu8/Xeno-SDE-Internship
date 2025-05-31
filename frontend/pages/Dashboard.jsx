@@ -16,6 +16,9 @@ const Dashboard = () => {
   const [visibleCountOC, setVisibleCountOC] = useState(5);
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [campaigns, setCampaigns] = useState([]);
+  const [loadingMoreCustomers, setLoadingMoreCustomers] = useState(false);
+  const [loadingMoreOrders, setLoadingMoreOrders] = useState(false);
+  const [loadingAddCampaign, setLoadingAddCampaign] = useState(false);
 
   // Reusable fetch function
   const fetchData = () => {
@@ -75,12 +78,20 @@ const Dashboard = () => {
     );
   // Handler for Load More button
   const loadMoreOC = () => {
-    setVisibleCountOC((prev) => prev + 5);
+    setLoadingMoreOrders(true);
+    setTimeout(() => {
+      setVisibleCountOC((prev) => prev + 5);
+      setLoadingMoreOrders(false);
+    }, 500);
   };
 
   const orderToShow = data.orders.slice(0, visibleCountOC);
   const loadMore = () => {
-    setVisibleCount((prev) => prev + 5);
+    setLoadingMoreCustomers(true);
+    setTimeout(() => {
+      setVisibleCount((prev) => prev + 5);
+      setLoadingMoreCustomers(false);
+    }, 500);
   };
 
   const customersToShow = data.customers.slice(0, visibleCount);
@@ -334,9 +345,20 @@ const Dashboard = () => {
                     <button
                       className="btn btn-primary"
                       onClick={loadMore}
-                      disabled={loading}
+                      disabled={loadingMoreCustomers}
                     >
-                      {loading ? "Loading..." : "Load More"}
+                      {loadingMoreCustomers ? (
+                        <span>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
+                          Loading...
+                        </span>
+                      ) : (
+                        "Load More"
+                      )}
                     </button>
                   </div>
                 )}
@@ -396,9 +418,20 @@ const Dashboard = () => {
                     <button
                       className="btn btn-info"
                       onClick={loadMoreOC}
-                      disabled={loading}
+                      disabled={loadingMoreOrders}
                     >
-                      {loading ? "Loading..." : "Load More"}
+                      {loadingMoreOrders ? (
+                        <span>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
+                          Loading...
+                        </span>
+                      ) : (
+                        "Load More"
+                      )}
                     </button>
                   </div>
                 )}
@@ -413,9 +446,25 @@ const Dashboard = () => {
               <h5 className="mb-0">Campaigns</h5>
               <button
                 className="btn btn-light text-dark fw-bold"
-                onClick={() => setShowCampaignModal(true)}
+                onClick={() => {
+                  setLoadingAddCampaign(true);
+                  setShowCampaignModal(true);
+                  setTimeout(() => setLoadingAddCampaign(false), 500);
+                }}
+                disabled={loadingAddCampaign}
               >
-                + Add Campaign
+                {loadingAddCampaign ? (
+                  <span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Adding...
+                  </span>
+                ) : (
+                  "+ Add Campaign"
+                )}
               </button>
               {/* CampaignCard modal */}
               <CampaignCard

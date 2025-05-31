@@ -10,6 +10,7 @@ const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
     email: "",
     phone: "",
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchNextCustomerId = async () => {
@@ -35,11 +36,11 @@ const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     try {
       const res = await API.post("/api/add-customer", formData);
       if (res.status === 200 || res.status === 201) {
-        toast.success("Customer Sucessfully Added")
+        toast.success("Customer Sucessfully Added");
         onCustomerAdded(res.data.customer); // optional callback
         onClose(); // close modal
       }
@@ -49,6 +50,8 @@ const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
         err.response?.data || err.message
       );
       toast.error("Failed to add customer");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -125,11 +128,38 @@ const CustomerCard = ({ show, onClose, onCustomerAdded }) => {
                 type="button"
                 className="btn btn-secondary"
                 onClick={onClose}
+                disabled={loading}
               >
-                Cancel
+                {loading ? (
+                  <span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Cancelling...
+                  </span>
+                ) : (
+                  "Cancel"
+                )}
               </button>
-              <button type="submit" className="btn btn-primary">
-                Add Customer
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Adding...
+                  </span>
+                ) : (
+                  "Add Customer"
+                )}
               </button>
             </div>
           </form>

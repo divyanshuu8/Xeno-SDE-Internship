@@ -12,6 +12,7 @@ import SaaSFooter from "../components/Footer";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
+  const [oauthLoading, setOauthLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,6 +32,7 @@ function App() {
       );
 
       if (event.data.success) {
+        setOauthLoading(true);
         // Immediately check session status from backend after OAuth
         API.get("/api/auth/status")
           .then((res) => {
@@ -45,7 +47,8 @@ function App() {
           })
           .catch(() => {
             toast.error("Session check failed. Please try again.");
-          });
+          })
+          .finally(() => setOauthLoading(false));
       } else {
         toast.error("OAuth login failed");
       }
@@ -88,6 +91,23 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:logId" element={<CampaignLog />} />
       </Routes>
+      {oauthLoading && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex justify-content-center align-items-center"
+          style={{ zIndex: 2000 }}
+        >
+          <div
+            className="spinner-border text-primary"
+            role="status"
+            style={{ width: "3rem", height: "3rem" }}
+          >
+            <span className="visually-hidden">Logging in...</span>
+          </div>
+          <span className="ms-3 fw-bold text-primary">
+            Logging in with Google...
+          </span>
+        </div>
+      )}
       <SaaSFooter />
     </>
   );

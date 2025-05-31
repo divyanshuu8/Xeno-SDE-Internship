@@ -21,6 +21,7 @@ const CampaignLog = () => {
   const [campaign, setCampaign] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCommModal, setShowCommModal] = useState(false);
+  const [loadingCreateLog, setLoadingCreateLog] = useState(false);
 
   const fetchCampaign = async () => {
     try {
@@ -39,7 +40,11 @@ const CampaignLog = () => {
     fetchCampaign();
   }, [logId]);
 
-  const handleCreateLog = () => setShowCommModal(true);
+  const handleCreateLog = () => {
+    setLoadingCreateLog(true);
+    setShowCommModal(true);
+    setTimeout(() => setLoadingCreateLog(false), 500); // fallback: reset after modal opens
+  };
 
   if (loading) {
     return (
@@ -65,9 +70,29 @@ const CampaignLog = () => {
           <h2>📊 Campaign Dashboard</h2>
         </Col>
         <Col className="text-end">
-          <Button variant="success" onClick={handleCreateLog}>
-            <FaPlusCircle className="me-2" />
-            Create Communication Log
+          <Button
+            variant="success"
+            onClick={handleCreateLog}
+            disabled={loadingCreateLog}
+          >
+            {loadingCreateLog ? (
+              <span>
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                  className="me-2"
+                />
+                Creating...
+              </span>
+            ) : (
+              <>
+                <FaPlusCircle className="me-2" />
+                Create Communication Log
+              </>
+            )}
           </Button>
         </Col>
       </Row>

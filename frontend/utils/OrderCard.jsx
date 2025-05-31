@@ -15,6 +15,7 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
   const [customerName, setCustomerName] = useState(""); // To store fetched customer name
   const [customerLoading, setCustomerLoading] = useState(false);
   const [customerError, setCustomerError] = useState(null);
+  const [loading, setLoading] = useState(false); // New loading state
 
   // Fetch latest order id when modal shows
   useEffect(() => {
@@ -75,11 +76,12 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("handleSubmit called");
+    setLoading(true); // Set loading to true on submit
 
     // Prevent submission if customer name not found or error exists
     if (customerError || !customerName) {
       toast.error("Please enter a valid Customer ID.");
+      setLoading(false); // Reset loading state
       return;
     }
 
@@ -100,6 +102,8 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
     } catch (err) {
       console.error("Error adding order:", err.response?.data || err.message);
       toast.error("Failed to add order");
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
 
@@ -203,11 +207,38 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
                 type="button"
                 className="btn btn-secondary"
                 onClick={onClose}
+                disabled={loading}
               >
-                Cancel
+                {loading ? (
+                  <span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Cancelling...
+                  </span>
+                ) : (
+                  "Cancel"
+                )}
               </button>
-              <button type="submit" className="btn btn-success">
-                Add Order
+              <button
+                type="submit"
+                className="btn btn-success"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Adding...
+                  </span>
+                ) : (
+                  "Add Order"
+                )}
               </button>
             </div>
           </form>

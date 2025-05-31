@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../src/api";
 import toast from "react-hot-toast";
@@ -6,8 +6,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js"; // <-- Required for dropdowns & toggles
 
 const NavbarComponent = ({ isLoggedIn, setIsLoggedIn }) => {
+  const [loadingSignOut, setLoadingSignOut] = useState(false);
+  const [loadingDashboard, setLoadingDashboard] = useState(false);
   const navigate = useNavigate();
   const handleDashboardClick = async () => {
+    setLoadingDashboard(true);
     try {
       const res = await API.get("/api/auth/status");
       if (res.data.isLoggedIn) {
@@ -19,18 +22,22 @@ const NavbarComponent = ({ isLoggedIn, setIsLoggedIn }) => {
     } catch (error) {
       console.error("Auth check failed:", error);
       toast.error("Something went wrong");
+    } finally {
+      setLoadingDashboard(false);
     }
   };
   const handleSignOut = async () => {
+    setLoadingSignOut(true);
     try {
       await API.get("/logout"); // Logout API call
       toast.success("Logged out successfully");
-      // Optional: clear user state if stored
       setIsLoggedIn(false);
-      navigate("/"); // Redirect to homepage or login
+      navigate("/");
     } catch (err) {
       console.error("Logout failed:", err);
       toast.error("Logout failed");
+    } finally {
+      setLoadingSignOut(false);
     }
   };
   return (
@@ -56,8 +63,20 @@ const NavbarComponent = ({ isLoggedIn, setIsLoggedIn }) => {
                 <button
                   className="btn btn-danger rounded-pill px-4"
                   onClick={handleSignOut}
+                  disabled={loadingSignOut}
                 >
-                  Sign out
+                  {loadingSignOut ? (
+                    <span>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Signing out...
+                    </span>
+                  ) : (
+                    "Sign out"
+                  )}
                 </button>
               ) : (
                 <a
@@ -73,15 +92,39 @@ const NavbarComponent = ({ isLoggedIn, setIsLoggedIn }) => {
                 <button
                   className="btn btn-primary rounded-pill px-4"
                   onClick={handleDashboardClick}
+                  disabled={loadingDashboard}
                 >
-                  Dashboard
+                  {loadingDashboard ? (
+                    <span>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Loading...
+                    </span>
+                  ) : (
+                    "Dashboard"
+                  )}
                 </button>
               ) : (
                 <button
                   className="btn btn-primary rounded-pill px-4"
                   onClick={handleDashboardClick}
+                  disabled={loadingDashboard}
                 >
-                  Get Started
+                  {loadingDashboard ? (
+                    <span>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Loading...
+                    </span>
+                  ) : (
+                    "Get Started"
+                  )}
                 </button>
               )}
             </li>

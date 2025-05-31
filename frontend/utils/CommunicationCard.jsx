@@ -104,7 +104,20 @@ const CommunicationCard = ({ campaign, onClose, refreshCampaign }) => {
             onClick={handleGenerateAIMessage}
             disabled={loading}
           >
-            <FaRobot className="me-1" /> AI Generated
+            {loading ? (
+              <span>
+                <span
+                  className="spinner-border spinner-border-sm me-1"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                Generating...
+              </span>
+            ) : (
+              <>
+                <FaRobot className="me-1" /> AI Generated
+              </>
+            )}
           </Button>
         </div>
         <Form.Control
@@ -121,11 +134,38 @@ const CommunicationCard = ({ campaign, onClose, refreshCampaign }) => {
       {success && <div className="text-success mb-3">{success}</div>}
 
       <div className="d-flex justify-content-end mt-4">
-        <Button variant="secondary" onClick={onClose} className="me-2">
-          Cancel
+        <Button
+          variant="secondary"
+          onClick={onClose}
+          className="me-2"
+          disabled={loading}
+        >
+          {loading ? (
+            <span>
+              <span
+                className="spinner-border spinner-border-sm me-1"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Cancelling...
+            </span>
+          ) : (
+            "Cancel"
+          )}
         </Button>
         <Button variant="primary" onClick={handleSubmit} disabled={loading}>
-          {loading ? "Sending..." : "Send Communication"}
+          {loading ? (
+            <span>
+              <span
+                className="spinner-border spinner-border-sm me-1"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Sending...
+            </span>
+          ) : (
+            "Send Communication"
+          )}
         </Button>
       </div>
     </Form>

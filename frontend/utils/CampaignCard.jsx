@@ -269,7 +269,18 @@ const CampaignCard = ({ show, onClose, onCampaignCreated }) => {
                   onClick={handlePreview}
                   disabled={previewLoading}
                 >
-                  {previewLoading ? "Checking..." : "Preview Audience Size"}
+                  {previewLoading ? (
+                    <span>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Checking...
+                    </span>
+                  ) : (
+                    "Preview Audience Size"
+                  )}
                 </button>
 
                 {audienceSize !== null && (
@@ -286,7 +297,18 @@ const CampaignCard = ({ show, onClose, onCampaignCreated }) => {
                 onClick={onClose}
                 disabled={loading}
               >
-                Cancel
+                {loading ? (
+                  <span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Cancelling...
+                  </span>
+                ) : (
+                  "Cancel"
+                )}
               </button>
               <button
                 type="submit"
@@ -302,7 +324,18 @@ const CampaignCard = ({ show, onClose, onCampaignCreated }) => {
                     : ""
                 }
               >
-                {loading ? "Creating..." : "Create Campaign"}
+                {loading ? (
+                  <span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Creating...
+                  </span>
+                ) : (
+                  "Create Campaign"
+                )}
               </button>
             </div>
           </form>
