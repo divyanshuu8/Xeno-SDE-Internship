@@ -2,6 +2,8 @@ require("dotenv").config();
 require("./config/passport");
 const dataRoutes = require("./routes/dataRoutes"); // Path as per your folder structure
 const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
+const path = require("path");
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -18,9 +20,20 @@ const sessionSecret = process.env.SESSION_SECRET;
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+if (process.env.NODE_ENV === "production") {
+  app.use(helmet()); // Security headers
+}
+
+// Configure CORS to allow requests from the frontend.
+// In production, the origin is set to the frontend URL from environment variables.
+// In development, it defaults to localhost:5767.
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5767",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.FRONTEND_URL
+        : "http://localhost:5767",
+    // Allow credentials (cookies, authorization headers, etc.) to be sent in requests.
     credentials: true,
   })
 );
@@ -47,6 +60,17 @@ app.get("/", (req, res) => {
 
 app.use(authRoutes);
 app.use("/api", dataRoutes);
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message:
+      process.env.NODE_ENV === "production"
+        ? "Internal Server Error"
+        : err.message,
+  });
+});
 
 // Start Server
 app.listen(PORT, () => {

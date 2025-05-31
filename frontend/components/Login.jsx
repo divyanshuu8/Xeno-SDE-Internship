@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Tabs from "../utils/Tab";
 import toast from "react-hot-toast";
-import API from '../src/api'; // adjust the path accordingly
+import API from "../src/api";
 
 const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
   const [fullName, setFullName] = useState("");
@@ -34,7 +34,6 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
               <form onSubmit={handleSubmit}>
                 {/* Tabs for Login/Sign Up */}
                 <Tabs activeTab={activeTab} onChange={handleTabChange} />
-
                 {/* Full Name - only shown when it's Sign Up */}
                 {activeTab === "register" && (
                   <div className="mb-3">
@@ -126,17 +125,28 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
                     const left = (window.innerWidth - width) / 2;
                     const top = (window.innerHeight - height) / 2;
 
-                    // Construct the full URL by appending the auth route to baseURL
                     const authUrl = new URL(
                       "/auth/google",
                       API.defaults.baseURL
                     ).href;
 
-                    window.open(
+                    // Open popup and check if blocked
+                    const popup = window.open(
                       authUrl,
                       "GoogleLogin",
                       `width=${width},height=${height},top=${top},left=${left}`
                     );
+                    if (
+                      !popup ||
+                      popup.closed ||
+                      typeof popup.closed === "undefined"
+                    ) {
+                      toast.error(
+                        "Popup was blocked. Please allow popups and try again."
+                      );
+                      // Optionally, dispatch a custom event for App.jsx to listen
+                      window.dispatchEvent(new Event("popupBlocked"));
+                    }
                   }}
                 >
                   {/* Google SVG Icon */}

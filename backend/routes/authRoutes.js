@@ -66,8 +66,14 @@ router.get("/logout", (req, res, next) => {
     if (err) return next(err);
     req.session.destroy((err) => {
       if (err) console.log(err);
-      res.clearCookie("connect.sid");
-      // Send a response here to complete the request:
+      // Clear the correct session cookie name based on environment
+      const cookieName =
+        process.env.NODE_ENV === "production" ? "sid" : "connect.sid";
+      res.clearCookie(cookieName, {
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+      });
       res.status(200).json({ message: "Logged out successfully" });
     });
   });

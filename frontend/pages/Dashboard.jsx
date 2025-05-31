@@ -4,6 +4,7 @@ import OrderCard from "../utils/OrderCard";
 import API from "../src/api"; // adjust path as needed
 import CampaignCard from "../utils/CampaignCard";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -27,13 +28,35 @@ const Dashboard = () => {
       .catch((err) => {
         console.error("Error fetching data:", err);
         setLoading(false);
+        // Check if error is due to unauthorized/session expiry
+        if (
+          err.response &&
+          (err.response.status === 401 || err.response.status === 403)
+        ) {
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+        }
       });
   };
 
-  // Fetch on mount
+  // Check auth status before loading dashboard
   useEffect(() => {
-    fetchData();
-  }, []);
+    API.get("/api/auth/status")
+      .then((res) => {
+        if (!res.data.isLoggedIn) {
+          toast.error("Please login to access dashboard");
+          navigate("/login");
+          return;
+        }
+        // Only fetch dashboard data if logged in
+        fetchData();
+      })
+      .catch((err) => {
+        console.error("Auth check failed:", err);
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+      });
+  }, [navigate]);
 
   if (loading)
     return (

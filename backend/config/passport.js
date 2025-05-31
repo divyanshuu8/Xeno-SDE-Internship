@@ -11,6 +11,26 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+        // Defensive checks for missing profile fields
+        const email =
+          profile.emails && profile.emails[0]
+            ? profile.emails[0].value
+            : undefined;
+        const photo =
+          profile.photos && profile.photos[0]
+            ? profile.photos[0].value
+            : undefined;
+        const firstName =
+          profile.name && profile.name.givenName
+            ? profile.name.givenName
+            : undefined;
+        const lastName =
+          profile.name && profile.name.familyName
+            ? profile.name.familyName
+            : undefined;
+        const displayName = profile.displayName || undefined;
+        const provider = profile.provider || "google";
+
         // Check if user exists
         let existingUser = await User.findOne({ googleId: profile.id });
 
@@ -21,16 +41,20 @@ passport.use(
         // Create new user if not found
         const newUser = await User.create({
           googleId: profile.id,
-          displayName: profile.displayName,
-          firstName: profile.name.givenName,
-          lastName: profile.name.familyName,
-          email: profile.emails[0].value,
-          photo: profile.photos[0].value,
-          provider: profile.provider,
+          displayName,
+          firstName,
+          lastName,
+          email,
+          photo,
+          provider,
         });
 
         return done(null, newUser);
       } catch (err) {
+        if (process.env.NODE_ENV === "production") {
+          // Log error in production (could be replaced with a logging service)
+          console.error("Passport GoogleStrategy error:", err);
+        }
         return done(err, null);
       }
     }

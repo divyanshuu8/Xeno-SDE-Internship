@@ -19,22 +19,43 @@ function App() {
       .then((res) => setIsLoggedIn(res.data.isLoggedIn))
       .catch((err) => console.log("Auth check error:", err));
 
+    let popup = null;
+    let popupBlocked = false;
+
     const handleMessage = (event) => {
       const allowedOrigin = new URL(API.defaults.baseURL).origin;
-
       if (event.origin !== allowedOrigin) return;
 
       if (event.data.success) {
-        toast.success("OAuth login successful");
-        setIsLoggedIn(true);
-        navigate("/dashboard");
+        // Immediately check session status from backend after OAuth
+        API.get("/api/auth/status")
+          .then((res) => {
+            if (res.data.isLoggedIn) {
+              toast.success("OAuth login successful");
+              setIsLoggedIn(true);
+              navigate("/dashboard");
+            } else {
+              toast.error("Session not established. Please try again.");
+            }
+          })
+          .catch(() => {
+            toast.error("Session check failed. Please try again.");
+          });
       } else {
         toast.error("OAuth login failed");
       }
     };
 
+    // Listen for popup blocked
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    window.addEventListener("popupBlocked", () => {
+      popupBlocked = true;
+      toast.error("Popup was blocked. Please allow popups and try again.");
+    });
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      window.removeEventListener("popupBlocked", () => {});
+    };
   }, []);
 
   return (
