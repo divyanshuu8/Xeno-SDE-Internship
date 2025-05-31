@@ -19,9 +19,6 @@ function App() {
       .then((res) => setIsLoggedIn(res.data.isLoggedIn))
       .catch((err) => console.log("Auth check error:", err));
 
-    let popup = null;
-    let popupBlocked = false;
-
     const handleMessage = (event) => {
       const allowedOrigin = new URL(API.defaults.baseURL).origin;
       if (event.origin !== allowedOrigin) return;
@@ -46,17 +43,9 @@ function App() {
       }
     };
 
-    // Listen for popup blocked
     window.addEventListener("message", handleMessage);
-    window.addEventListener("popupBlocked", () => {
-      popupBlocked = true;
-      toast.error("Popup was blocked. Please allow popups and try again.");
-    });
-    return () => {
-      window.removeEventListener("message", handleMessage);
-      window.removeEventListener("popupBlocked", () => {});
-    };
-  }, []);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [navigate]);
 
   return (
     <>
