@@ -49,12 +49,11 @@ app.use(express.json());
 app.use(sessionMiddleware(mongoUrl, sessionSecret));
 app.use(cookieParser());
 
-app.use(express.static(path.join(__dirname, "public")));
-
 // Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Move this route ABOVE app.use(express.static(...)) so it takes precedence
 app.get("/oauth-popup-close.html", (req, res) => {
   res.setHeader(
     "Content-Security-Policy",
@@ -62,6 +61,8 @@ app.get("/oauth-popup-close.html", (req, res) => {
   );
   res.sendFile(path.join(__dirname, "public", "oauth-popup-close.html"));
 });
+
+app.use(express.static(path.join(__dirname, "public")));
 
 // Routes
 app.get("/", (req, res) => {
