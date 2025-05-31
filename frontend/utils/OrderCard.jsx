@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import API from "../src/api"; // use your centralized axios instance
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -17,6 +17,7 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
   const [customerError, setCustomerError] = useState(null);
   const [loading, setLoading] = useState(false); // New loading state
   const [cancelLoading, setCancelLoading] = useState(false);
+  const debounceTimeout = useRef();
 
   // Fetch latest order id when modal shows
   useEffect(() => {
@@ -39,16 +40,15 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
 
   // Fetch customer name whenever customer_id changes and is not empty
   useEffect(() => {
-    const fetchCustomerName = async () => {
-      if (!formData.customer_id.trim()) {
-        setCustomerName("");
-        setCustomerError(null);
-        return;
-      }
-
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    if (!formData.customer_id.trim()) {
+      setCustomerName("");
+      setCustomerError(null);
+      return;
+    }
+    debounceTimeout.current = setTimeout(async () => {
       setCustomerLoading(true);
       setCustomerError(null);
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 2 seconds
       try {
         const res = await API.get(
           `api/customers/${formData.customer_id.trim()}`
@@ -60,9 +60,8 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
       } finally {
         setCustomerLoading(false);
       }
-    };
-
-    fetchCustomerName();
+    }, 600); // 600ms debounce
+    return () => clearTimeout(debounceTimeout.current);
   }, [formData.customer_id]);
 
   const handleChange = (e) => {
