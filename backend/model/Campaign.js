@@ -8,7 +8,7 @@ const campaignSchema = new mongoose.Schema(
       trim: true,
     },
     audienceSegment: {
-      type: Object, // JSON query object
+      type: Object, 
       required: true,
     },
     audienceSize: {

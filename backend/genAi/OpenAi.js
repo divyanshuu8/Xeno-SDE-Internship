@@ -34,7 +34,6 @@ Return ONLY the MongoDB query object — no explanations, no comments, and no te
     const queryText = response.choices[0].message.content.trim();
     console.log("Response from OpenAI:", queryText);
 
-    // Replace any new Date("...") or new Date('...') with the ISO string inside (robust, global)
     const safeJson = queryText.replace(
       /new Date\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
       '"$1"'

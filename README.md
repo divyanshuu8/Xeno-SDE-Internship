@@ -136,3 +136,10 @@ The architecture of **Mi-CMS** is designed to ensure modularity, scalability, an
 - **CSS Framework:** **Bootstrap** is used for styling and to ensure a clean, responsive design.
 
 ### 6. Known limitations or assumptions
+
+- **Does not work in browsers (like Brave) where third-party cookies are blocked.** Google OAuth and session management require third-party cookies to be enabled for authentication to work reliably.
+- **Campaign audience is not updated when new customers are added to the database.** Once a campaign is created, its audience is fixed and does not reflect new customers who match the segment criteria.
+- **No email/SMS delivery integration.** Communication logs are recorded in the system, but actual sending of emails or SMS messages is not implemented.
+- **No role-based access control.** All authenticated users have the same permissions; there is no admin/user separation or granular access control.
+- **AI-generated queries may require manual review.** The OpenAI-powered NLP-to-query feature may sometimes generate queries that need manual adjustment, especially for complex or ambiguous descriptions.
+- **No pagination or performance optimization for large datasets.** The dashboard loads all customers and orders at once, which may impact performance with large data volumes.

@@ -1,6 +1,6 @@
 require("dotenv").config();
 require("./config/passport");
-const dataRoutes = require("./routes/dataRoutes"); // Path as per your folder structure
+const dataRoutes = require("./routes/dataRoutes");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const path = require("path");
@@ -24,16 +24,12 @@ if (process.env.NODE_ENV === "production") {
   app.use(helmet()); // Security headers
 }
 
-// Configure CORS to allow requests from the frontend.
-// In production, the origin is set to the frontend URL from environment variables.
-// In development, it defaults to localhost:5767.
 app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
         ? process.env.FRONTEND_URL
         : "http://localhost:5173",
-    // Allow credentials (cookies, authorization headers, etc.) to be sent in requests.
     credentials: true,
   })
 );
@@ -53,7 +49,6 @@ app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Move this route ABOVE app.use(express.static(...)) so it takes precedence
 app.get("/oauth-popup-close.html", (req, res) => {
   res.setHeader(
     "Content-Security-Policy",
