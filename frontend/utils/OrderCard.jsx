@@ -48,13 +48,11 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
 
       setCustomerLoading(true);
       setCustomerError(null);
-
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 2 seconds
       try {
         const res = await API.get(
           `api/customers/${formData.customer_id.trim()}`
         );
-        console.log(res);
-        // Assuming API returns { id: "...", name: "Customer Name" }
         setCustomerName(res.data.name);
       } catch (err) {
         setCustomerName("");
