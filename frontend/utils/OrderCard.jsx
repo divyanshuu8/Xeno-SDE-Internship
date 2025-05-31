@@ -23,7 +23,6 @@ const OrderCard = ({ show, onClose, onOrderAdded }) => {
     const fetchNextOrderId = async () => {
       if (show) {
         try {
-          k;
           const res = await API.get("/api/latest-order-id");
           setFormData((prev) => ({
             ...prev,
