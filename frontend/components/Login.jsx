@@ -144,9 +144,24 @@ const Login = ({ setIsLoggedIn, setActiveTab, activeTab }) => {
                       toast.error(
                         "Popup was blocked. Please allow popups and try again."
                       );
-                      // Optionally, dispatch a custom event for App.jsx to listen
                       window.dispatchEvent(new Event("popupBlocked"));
+                      return;
                     }
+
+                    // Poll for login status if postMessage fails
+                    const poll = setInterval(() => {
+                      if (popup.closed) {
+                        API.get("/api/auth/status")
+                          .then((res) => {
+                            if (res.data.isLoggedIn) {
+                              toast.success("OAuth login successful");
+                              window.location.reload();
+                            }
+                          })
+                          .catch(() => {});
+                        clearInterval(poll);
+                      }
+                    }, 1000);
                   }}
                 >
                   {/* Google SVG Icon */}
