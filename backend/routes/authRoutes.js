@@ -10,37 +10,16 @@ router.get(
 
 router.get("/auth/google/callback", (req, res, next) => {
   passport.authenticate("google", (err, user) => {
+    let success = true;
     if (err || !user) {
-      res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
-      res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-
-      return res.send(`
-        <script>
-          window.opener.postMessage({ success: false, message: "Login failed" }, "*");
-          window.close();
-        </script>
-      `);
+      success = false;
     }
-
+    if (!success) {
+      req.logIn = (u, cb) => cb && cb(); // no-op if not logged in
+    }
     req.logIn(user, (err) => {
-      res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
-      res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-
-      if (err) {
-        return res.send(`
-          <script>
-            window.opener.postMessage({ success: false, message: "Login failed" }, "*");
-            window.close();
-          </script>
-        `);
-      }
-
-      return res.send(`
-        <script>
-          window.opener.postMessage({ success: true, message: "Login successful" }, "*");
-          window.close();
-        </script>
-      `);
+      // Redirect to static HTML file with success/failure as query param
+      return res.redirect(`/oauth-popup-close.html?success=${!err && success}`);
     });
   })(req, res, next);
 });
