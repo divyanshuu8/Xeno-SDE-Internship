@@ -55,6 +55,14 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.get("/oauth-popup-close.html", (req, res) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "script-src 'self' 'unsafe-inline';"
+  );
+  res.sendFile(path.join(__dirname, "public", "oauth-popup-close.html"));
+});
+
 // Routes
 app.get("/", (req, res) => {
   res.send("Welcome to Mi-CMS");
