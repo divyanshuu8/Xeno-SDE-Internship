@@ -8,11 +8,17 @@
     <script>
       const params = new URLSearchParams(window.location.search);
       const success = params.get("success") === "true";
-      window.opener.postMessage(
-        { success, message: success ? "Login successful" : "Login failed" },
-        "*"
-      );
-      window.close();
+      if (window.opener) {
+        window.opener.postMessage(
+          { success, message: success ? "Login successful" : "Login failed" },
+          "*"
+        );
+        window.close();
+      } else {
+        // Optionally, show a message or just close the window
+        document.body.innerHTML =
+          "<h3>Login complete. You may close this window.</h3>";
+      }
     </script>
   </body>
 </html>
