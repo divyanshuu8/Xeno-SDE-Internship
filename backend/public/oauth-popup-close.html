@@ -17,9 +17,20 @@
         );
         window.close();
       } else {
-        // Optionally, show a message or just close the window
-        document.body.innerHTML =
-          "<h3>Login complete. You may close this window.</h3>";
+        // Mobile/tab fallback: show message and a button to return to app
+        document.body.innerHTML = `
+          <h3>Login complete.</h3>
+          <p>Please return to the original tab. The page will update automatically.</p>
+          <button id="returnToApp" style="padding:8px 16px;margin-top:12px;font-size:1rem;">Return to App</button>
+        `;
+        document.getElementById('returnToApp').onclick = function() {
+          // Try to close the tab
+          window.close();
+          // If not possible, redirect to the app's dashboard or home
+          setTimeout(function() {
+            window.location.href = "https://xeno-internship.netlify.app/dashboard";
+          }, 500);
+        };
       }
     </script>
   </body>
