@@ -26,7 +26,11 @@
         document.getElementById('returnToApp').onclick = function() {
           // Try to close the tab
           window.close();
-          // If not possible, redirect to the app's dashboard or home
+          // If not possible, reload the opener (main app) if available
+          if (window.opener) {
+            window.opener.location.reload();
+          }
+          // If still not possible, redirect to the app's dashboard
           setTimeout(function() {
             window.location.href = "https://xeno-internship.netlify.app/dashboard";
           }, 500);
